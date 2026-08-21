@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://d2d6ngmgbgef3"]
+
+[ext_resource type="Script" uid="uid://cua06urvsxh7x" path="res://space_ship.gd" id="1_cjnfv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jwvub"]
+size = Vector3(5.4, 5.4, 12.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ft4i2"]
+albedo_color = Color(0.16578418, 0.15749013, 0.538104, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fbbf3"]
+material = SubResource("StandardMaterial3D_ft4i2")
+size = Vector3(5.4, 5.4, 12.6)
+
+[node name="SpaceShip" type="CharacterBody3D" unique_id=2134136209]
+script = ExtResource("1_cjnfv")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=970259109]
+shape = SubResource("BoxShape3D_jwvub")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1617739861]
+mesh = SubResource("BoxMesh_fbbf3")
+
+[node name="CameraPivot" type="Node3D" parent="." unique_id=224862000]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 20, 20)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=454244347]
