@@ -1,28 +1,64 @@
-extends CharacterBody3D
+extends RigidBody3D
+
+@export var masa: int = 2 # En kg
 
 
-const SPEED = 5.0
-const JUMP_VELOCITY = 4.5
+
+func GetNeighbors():
+	return $neighborArea3D.get_overlapping_bodies()
+
+func _init() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+var gravity_dir = Vector3(0,0,0)
+var gravity_force = 0
+const gConstant = 2
+
+func calcGravitiy():
+	var isNearPlanet = GetNeighbors().size() > 0
+	if(isNearPlanet):
+		var planet = GetNeighbors()[0].get_parent()
+		
+		gravity_dir = (planet.position - position)
+		gravity_force = gConstant*(planet.masa * masa)/gravity_dir.length()
+		gravity_dir = gravity_dir.normalized()
+	else:
+		gravity_force = 0
+		gravity_dir = Vector3.ZERO
+
+var yaw_rate = 0.0
+var pitch_rate = 0.0
+const ROLL_DAMP = 3.0 
+func calcMouseRotations(delta: float):
+	var mouse = Input.get_last_mouse_velocity()
+	var sensitivity = 0.05
+
+	yaw_rate = -mouse.x * sensitivity* delta
+	pitch_rate = -mouse.y * sensitivity* delta
+
+	# pasar angular_velocity (global) a espacio local de la nave
+	var local_ang_vel = global_transform.basis.inverse() * angular_velocity
+
+	local_ang_vel.y = yaw_rate      # tú mandas en yaw
+	local_ang_vel.x = pitch_rate    # tú mandas en pitch
+	local_ang_vel.z *= 1.0 - min(ROLL_DAMP * delta, 1.0)  # roll decae solo, no lo fuerzas a 0 directo
+
+	angular_velocity = global_transform.basis * local_ang_vel
+
+var velocity = Vector3(0,0,0)
+const SPEED = 20
 
 
 func _physics_process(delta: float) -> void:
-	# Add the gravity.
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-
-	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
+	calcGravitiy()
+	calcMouseRotations(delta)
+	
 	var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
+	var input_altura = Input.get_axis("shift","space")
 
-	move_and_slide()
+	var direction := (transform.basis * Vector3(input_dir.x, input_altura, input_dir.y)).normalized()
+	
+	linear_velocity += gravity_dir * gravity_force * delta
+	if direction:
+		linear_velocity += direction * SPEED * delta
