@@ -13,6 +13,8 @@ data = PackedVector3Array(-43.30127, -50, -75, -75, -50, -43.30127, -43.30127, -
 
 [node name="SpaceShip" parent="." unique_id=2134136209 instance=ExtResource("1_glv2v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 134.20224, 0)
+contact_monitor = true
+max_contacts_reported = 5
 script = ExtResource("2_r0du0")
 
 [node name="neighborArea3D" type="Area3D" parent="SpaceShip" unique_id=1337646219]

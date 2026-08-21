@@ -2,6 +2,23 @@ extends RigidBody3D
 
 @export var masa: int = 2 # En kg
 
+var on_floor: bool = false
+
+func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
+	var contact_count := state.get_contact_count()
+
+	if contact_count == 0:
+		on_floor = false
+		return
+
+	var local_up := state.transform.basis.y.normalized()
+
+	on_floor = false
+	for i in contact_count:
+		var normal := state.get_contact_local_normal(i)
+		if normal.dot(local_up) > 0.99: 
+			on_floor = true
+			break
 
 
 func GetNeighbors():
@@ -53,6 +70,10 @@ const SPEED = 20
 func _physics_process(delta: float) -> void:
 	calcGravitiy()
 	calcMouseRotations(delta)
+	
+	if(on_floor):
+		angular_velocity = Vector3.ZERO
+	print(on_floor)
 	
 	var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var input_altura = Input.get_axis("shift","space")
